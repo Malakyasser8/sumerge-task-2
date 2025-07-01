@@ -1,0 +1,95 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Raleway", sans-serif;
+}
+
+body {
+  background-image: linear-gradient(
+    to right,
+    rgb(54, 109, 205),
+    rgb(133, 14, 231)
+  );
+}
+
+h4 {
+  font-weight: 700;
+}
+
+.main-todo-list {
+  margin: auto;
+  margin-top: 10vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .main-todo-list {
+    flex-direction: column;
+  }
+}
+
+.completed-list,
+.pending-list {
+  margin: 1%;
+  min-width: 10rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 1px;
+  border-style: ridge;
+  border-radius: 20px;
+  background-color: white;
+}
+
+.error-msg {
+  color: red;
+  display: none;
+  font-size: small;
+  margin-left: 3vw;
+}
+
+.grab-item {
+  cursor: grab;
+}
+
+.item {
+  border: none;
+  outline: none;
+  width: 90%;
+  background-color: rgb(240, 245, 255);
+}
+
+.item:nth-child(even) {
+ background-color: rgb(245, 248, 255);
+}
+
+.item:nth-child(odd) {
+ background-color: rgb(248, 244, 252);
+}
+
+.completed-list-items,
+.pending-list-items {
+  width: 90%;
+  min-height: 100px;
+  border: 2px dashed rgb(206, 205, 208);
+}
+
+#completed-list-items.drag-over {
+  background-color: white;
+  border-color: rgb(54, 109, 205);
+}
+
+.button-color {
+  background-color: rgb(54, 109, 205);
+  border-color: rgb(54, 109, 205);
+}
+
+.button-color:hover {
+  background-color: rgb(133, 14, 231);
+  border-color: rgb(133, 14, 231);
+}
