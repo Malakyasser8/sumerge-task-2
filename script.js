@@ -40,7 +40,7 @@ function makeDraggable(element) {
 
 function addTodoToPendingList(event) {
   event.preventDefault();
-  const todoTextInput = document.getElementById("todo-text-input").value;
+  const todoTextInput = document.getElementById("todo-text-input").value.trim();
   const errorDiv = document.getElementById("error-input");
 
   if (todoTextInput.length == 0) {
