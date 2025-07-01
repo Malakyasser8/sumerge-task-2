@@ -44,6 +44,13 @@ function addTodoToPendingList(event) {
   const errorDiv = document.getElementById("error-input");
 
   if (todoTextInput.length == 0) {
+    errorDiv.innerHTML = "Please input todo name";
+    errorDiv.style.display = "block";
+    return;
+  }
+
+  if (todoTextInput.length >= 500) {
+    errorDiv.innerHTML = "Todo name must be between 1-500 characters";
     errorDiv.style.display = "block";
     return;
   }
@@ -53,7 +60,7 @@ function addTodoToPendingList(event) {
   });
 
   if (duplicates.length != 0) {
-    errorDiv.innerHTML = "Can't Add Duplicated Pending Todos";
+    errorDiv.innerHTML = "Can't add duplicated pending todos names";
     errorDiv.style.display = "block";
     return;
   }
@@ -115,7 +122,7 @@ function addTodoToCompletedList(element) {
   //append template content to the completed list
   let completedList = document.getElementById("completed-list-items");
   let templateContent = completedItem.content;
-  completedList.appendChild(templateContent.cloneNode(true));
+  completedList.prepend(templateContent.cloneNode(true));
 }
 
 function searchTodoItems(inputId, listId) {
