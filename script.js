@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
     completedList.classList.remove("drag-over");
 
     if (selectedItem) {
-      console.log(selectedItem.querySelector("input"));
       addTodoToCompletedList(selectedItem.querySelector("input"));
       selectedItem = null;
     }
@@ -41,6 +40,7 @@ function makeDraggable(element) {
 function addTodoToPendingList(event) {
   event.preventDefault();
   const todoTextInput = document.getElementById("todo-text-input").value.trim();
+  const priorityValue = document.getElementById("priority-value").value;
   const errorDiv = document.getElementById("error-input");
 
   if (todoTextInput.length == 0) {
@@ -75,11 +75,12 @@ function addTodoToPendingList(event) {
   let pendingList = document.getElementById("pending-list-items");
 
   //Set the checkbox label to the input text
-  checkItemLabel.innerHTML = todoTextInput;
+  checkItemLabel.innerHTML = `${priorityValue}. ${todoTextInput}`;
   pendingItems.push(todoTextInput);
 
-  //empty value in text input
+  //empty value in text input and numeric input
   document.getElementById("todo-text-input").value = "";
+  document.getElementById("priority-value").value = "";
 
   //Add item to the pending list and inc count
   pendingItemsCount++;
@@ -87,21 +88,39 @@ function addTodoToPendingList(event) {
   checkItemDiv.id = newId;
 
   //append template content to the pending list
-  let templateContent = checkItem.content;
-  pendingList.appendChild(templateContent.cloneNode(true));
+  let newItem = checkItem.content.cloneNode(true).firstElementChild;
+  newItem.setAttribute("data-priority", priorityValue);
+  let newPriority = parseInt(priorityValue, 10);
+
+  let inserted = false;
+  for (let child of pendingList.children) {
+    let childPriority = parseInt(child.getAttribute("data-priority"), 10);
+    if (newPriority < childPriority) {
+      pendingList.insertBefore(newItem, child);
+      inserted = true;
+      break;
+    }
+  }
+  if (!inserted) {
+    pendingList.appendChild(newItem);
+  }
 
   makeDraggable(pendingList.lastElementChild);
 
-  console.log(`Added new todo with text: ${todoTextInput} to the pending list`);
+  console.log(
+    `Added new todo with text: ${todoTextInput} with priority ${priorityValue} to the pending list`
+  );
 }
 
 function addTodoToCompletedList(element) {
-  console.log("element");
-  console.log(element);
   const checkItemId = element.parentElement.id;
   const checkItemLabel = element.parentElement.querySelector("label").innerHTML;
   let checkItem = document.getElementById(checkItemId);
   checkItem.remove();
+
+  //empty pending list to show empty effect
+  let pendingListItems = document.getElementById("pending-list-items");
+  if (pendingListItems.childElementCount == 0) pendingListItems.innerHTML = "";
 
   let completedItem = document.getElementById("completed-check-item");
   let completedItemLabel = completedItem.content.querySelector("label");
@@ -111,7 +130,7 @@ function addTodoToCompletedList(element) {
 
   //remove item from pending
   pendingItems = pendingItems.filter((item) => {
-    return item != checkItemLabel;
+    return item != checkItemLabel.split(". ")[1];
   });
 
   //Add item to the completed list and inc count
