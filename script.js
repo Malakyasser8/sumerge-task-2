@@ -15,12 +15,16 @@ window.selectedItem = null;
 
 // variable functions
 window.addTodoToPendingList = addTodoToPendingList;
+window.dragStart = dragStart;
+window.dragOver = dragOver;
+window.dragleave = dragleave;
+window.drop = drop;
 window.searchTodoItems = searchTodoItems;
 window.addTodoToCompletedList = addTodoToCompletedList;
 window.deleteAllData = deleteAllData;
 
 function dragStart(element) {
-  selectedItem = element;
+  window.selectedItem = element;
 }
 
 function dragOver(element, e) {
@@ -34,9 +38,9 @@ function dragleave(element) {
 
 function drop(element) {
   element.classList.remove("drag-over");
-  if (selectedItem) {
-    addTodoToCompletedList(selectedItem.querySelector("input"));
-    selectedItem = null;
+  if (window.selectedItem) {
+    addTodoToCompletedList(window.selectedItem.querySelector("input"));
+    window.selectedItem = null;
   }
 }
 

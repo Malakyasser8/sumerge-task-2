@@ -42,7 +42,9 @@ h1 {
 
 .completed-list,
 .pending-list {
-  margin: 1%;
+  margin: 1px;
+  margin-bottom: 1rem;
+  margin-right: 1rem;
   min-width: 10rem;
   display: flex;
   justify-content: center;
