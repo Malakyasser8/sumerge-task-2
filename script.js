@@ -19,6 +19,27 @@ window.searchTodoItems = searchTodoItems;
 window.addTodoToCompletedList = addTodoToCompletedList;
 window.deleteAllData = deleteAllData;
 
+function dragStart(element) {
+  selectedItem = element;
+}
+
+function dragOver(element, e) {
+  e.preventDefault();
+  element.classList.add("drag-over");
+}
+
+function dragleave(element) {
+  element.classList.remove("drag-over");
+}
+
+function drop(element) {
+  element.classList.remove("drag-over");
+  if (selectedItem) {
+    addTodoToCompletedList(selectedItem.querySelector("input"));
+    selectedItem = null;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async function () {
   await initFirebase();
   const todos = await getAllTodos();
@@ -30,27 +51,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   for (const item of completedTodos) {
     await addCompletedTodo(item.id, `${item.priority}. ${item.name}`);
   }
-
-  let completedList = document.getElementById("completed-list-items");
-
-  completedList.addEventListener("dragover", function (e) {
-    e.preventDefault();
-    completedList.classList.add("drag-over");
-  });
-
-  completedList.addEventListener("dragleave", function () {
-    completedList.classList.remove("drag-over");
-  });
-
-  completedList.addEventListener("drop", function (e) {
-    e.preventDefault();
-    completedList.classList.remove("drag-over");
-
-    if (window.selectedItem) {
-      addTodoToCompletedList(window.selectedItem.querySelector("input"));
-      window.selectedItem = null;
-    }
-  });
 });
 
 function makeDraggable(element) {
