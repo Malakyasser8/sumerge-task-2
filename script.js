@@ -1,30 +1,116 @@
-import {
-  initFirebase,
-  getAllTodos,
-  insertTodo,
-  deleteAllTodos,
-  updateTodo,
-  deleteTodo,
-} from "./firebase.js";
+let pendingItems = [];
+let pendingItemsIds = [];
+let pendingItemsCount = 0;
+let completedItemsCount = 0;
+let selectedItem = null;
 
-window.pendingItems = [];
-window.pendingItemsIds = [];
-window.pendingItemsCount = 0;
-window.completedItemsCount = 0;
-window.selectedItem = null;
+// firebase functions
+const baseUrl = `https://firestore.googleapis.com/v1beta1/projects/sumerge-task-3-todo-list/databases/(default)/documents/todos`;
+async function deleteTodo(itemId) {
+  try {
+    const response = await fetch(`${baseUrl}/${itemId}`, {
+      method: "DELETE",
+      headers: {},
+    });
 
-// variable functions
-window.addTodoToPendingList = addTodoToPendingList;
-window.dragStart = dragStart;
-window.dragOver = dragOver;
-window.dragleave = dragleave;
-window.drop = drop;
-window.searchTodoItems = searchTodoItems;
-window.addTodoToCompletedList = addTodoToCompletedList;
-window.deleteAllData = deleteAllData;
+    const data = await response.json();
+    console.log(`Deleted data of document id: ${itemId}`);
+  } catch (error) {
+    console.log(`Error while deleting doc. Error: ${error}`);
+  }
+}
 
+async function updateTodo(itemId, newBody) {
+  try {
+    const response = await fetch(
+      `${baseUrl}/${itemId}?updateMask.fieldPaths=status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fields: {
+            status: { stringValue: newBody.status },
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+    console.log(
+      `Updated data of document id: ${itemId} with data: ${JSON.stringify(
+        data
+      )}`
+    );
+  } catch (error) {
+    console.log(`Error while deleting all docs. Error: ${error}`);
+  }
+}
+
+async function insertTodo(newItem) {
+  try {
+    const response = await fetch(baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fields: {
+          name: { stringValue: newItem.name },
+          priority: { integerValue: String(newItem.priority) },
+          status: { stringValue: newItem.status },
+        },
+      }),
+    });
+
+    const data = await response.json();
+    return { id: data.name.split("/").pop(), ...newItem };
+  } catch (error) {
+    console.log(`Error while inserting a new todo. Error: ${error}`);
+  }
+}
+
+async function getAllTodos() {
+  try {
+    const response = await fetch(baseUrl, {
+      method: "GET",
+      headers: {},
+    });
+
+    const data = await response.json();
+    const list = data.documents?.map((doc) => {
+      const fields = doc.fields || {};
+      return {
+        id: doc.name?.split("/").pop() || "",
+        name: fields.name?.stringValue || "",
+        priority: parseInt(fields.priority?.integerValue || "1"),
+        status: fields.status?.stringValue || "pending",
+      };
+    });
+
+    console.log(list);
+
+    return list || [];
+  } catch (error) {
+    console.log(`Error while getting all docs. Error: ${error}`);
+  }
+}
+
+async function deleteAllTodos() {
+  try {
+    const list = await getAllTodos();
+    for (const item of list) {
+      await deleteTodo(item.id);
+    }
+  } catch (error) {
+    console.log(`Error while deleting all docs. Error: ${error}`);
+  }
+}
+
+//js functions
 function dragStart(element) {
-  window.selectedItem = element;
+  selectedItem = element;
 }
 
 function dragOver(element, e) {
@@ -38,14 +124,13 @@ function dragleave(element) {
 
 function drop(element) {
   element.classList.remove("drag-over");
-  if (window.selectedItem) {
-    addTodoToCompletedList(window.selectedItem.querySelector("input"));
-    window.selectedItem = null;
+  if (selectedItem) {
+    addTodoToCompletedList(selectedItem.querySelector("input"));
+    selectedItem = null;
   }
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  await initFirebase();
   const todos = await getAllTodos();
   const pendingTodos = todos.filter((item) => item.status == "pending");
   for (const item of pendingTodos) {
@@ -57,14 +142,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-function makeDraggable(element) {
-  element.setAttribute("draggable", "true");
-
-  element.addEventListener("dragstart", function (e) {
-    window.selectedItem = element;
-  });
-}
-
 function addNewPendingTodo(newId, todoTextInput, priorityValue) {
   let checkItem = document.getElementById("pending-check-item");
   let checkItemLabel = checkItem.content.querySelector(
@@ -75,15 +152,15 @@ function addNewPendingTodo(newId, todoTextInput, priorityValue) {
 
   //Set the checkbox label to the input text
   checkItemLabel.innerHTML = `${priorityValue}. ${todoTextInput}`;
-  window.pendingItemsIds.push(newId);
-  window.pendingItems.push(todoTextInput);
+  pendingItemsIds.push(newId);
+  pendingItems.push(todoTextInput);
 
   //empty value in text input and numeric input
   document.getElementById("todo-text-input").value = "";
   document.getElementById("priority-value").value = "";
 
   //Add item to the pending list and inc count
-  window.pendingItemsCount++;
+  pendingItemsCount++;
   checkItemDiv.id = newId;
 
   //append template content to the pending list
@@ -102,8 +179,6 @@ function addNewPendingTodo(newId, todoTextInput, priorityValue) {
   if (!inserted) {
     pendingList.appendChild(newItem);
   }
-
-  makeDraggable(newItem);
 }
 
 async function addTodoToPendingList(event) {
@@ -124,7 +199,7 @@ async function addTodoToPendingList(event) {
     return;
   }
 
-  const duplicates = window.pendingItems.filter((item) => {
+  const duplicates = pendingItems.filter((item) => {
     return item.toLowerCase() == todoTextInput.toLowerCase();
   });
 
@@ -161,12 +236,12 @@ async function addCompletedTodo(checkItemId, checkItemLabel) {
   completedItemLabel.innerHTML = checkItemLabel;
 
   //remove item from pending list and database
-  window.pendingItemsIds = window.pendingItemsIds.filter((item) => {
+  pendingItemsIds = pendingItemsIds.filter((item) => {
     return item != checkItemId;
   });
 
   //Add item to the completed list and inc count
-  window.completedItemsCount++;
+  completedItemsCount++;
 
   //append template content to the completed list
   let completedList = document.getElementById("completed-list-items");
@@ -187,7 +262,7 @@ async function addTodoToCompletedList(element) {
     status: "completed",
   });
 
-  const newId = `completed-check-item-id-${window.completedItemsCount}`;
+  const newId = `completed-check-item-id-${completedItemsCount}`;
   element.parentElement.querySelector("label").id = newId;
 }
 
