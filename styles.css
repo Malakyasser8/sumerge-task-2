@@ -83,11 +83,12 @@ h1 {
 .pending-list-items {
   width: 90%;
   min-height: 100px;
-  border: 2px dashed rgb(206, 205, 208);
   align-items: start;
+  /* border: 2px dashed rgb(206, 205, 208); */
 }
 
 .completed-list-items.drag-over {
+  border: 2px dashed rgb(206, 205, 208);
   background-color: white;
   border-color: rgb(54, 109, 205);
 }

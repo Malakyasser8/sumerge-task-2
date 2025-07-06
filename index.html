@@ -20,7 +20,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" type="text/css" />
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
   </head>
   <body>
     <!-- Define Todo Item Template in Pending List -->
@@ -78,6 +78,7 @@
                 class="form-control ms-4"
                 min="1"
                 placeholder="Enter Priority Value"
+                required
               />
               <input
                 type="search"
@@ -144,6 +145,13 @@
           ></section>
         </div>
       </div>
+      <button
+        type="button"
+        class="btn btn-primary btn-danger btn-lg mx-auto d-block my-4"
+        onclick="deleteAllData()"
+      >
+        Clear All Todos
+      </button>
     </div>
   </body>
 </html>
