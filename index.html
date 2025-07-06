@@ -29,6 +29,8 @@
         id="pending-check-item-id"
         data-priority="0"
         class="list-group-item grab-item item m-2"
+        draggable="true"
+        ondragstart="dragStart(this)"
       >
         <span class="drag-handle me-2">
           <i class="bi bi-grip-vertical"></i>
@@ -141,6 +143,9 @@
           <section
             id="completed-list-items"
             class="completed-list-items d-flex justify-content-center flex-column m-4 list-group"
+            ondragover="dragOver(this, event)"
+            ondragleave="dragleave(this)"
+            ondrop="drop(this)"
           ></section>
         </div>
       </div>

@@ -5,36 +5,25 @@ let completedItemsCount = 0;
 
 let selectedItem = null;
 
-document.addEventListener("DOMContentLoaded", function () {
-  pendingList = document.getElementById("pending-list-items");
-  completedList = document.getElementById("completed-list-items");
+function dragStart(element) {
+  selectedItem = element;
+}
 
-  completedList.addEventListener("dragover", function (e) {
-    e.preventDefault();
-    completedList.classList.add("drag-over");
-  });
+function dragOver(element, e) {
+  e.preventDefault();
+  element.classList.add("drag-over");
+}
 
-  completedList.addEventListener("dragleave", function () {
-    completedList.classList.remove("drag-over");
-  });
+function dragleave(element) {
+  element.classList.remove("drag-over");
+}
 
-  completedList.addEventListener("drop", function (e) {
-    e.preventDefault();
-    completedList.classList.remove("drag-over");
-
-    if (selectedItem) {
-      addTodoToCompletedList(selectedItem.querySelector("input"));
-      selectedItem = null;
-    }
-  });
-});
-
-function makeDraggable(element) {
-  element.setAttribute("draggable", "true");
-
-  element.addEventListener("dragstart", function (e) {
-    selectedItem = element;
-  });
+function drop(element) {
+  element.classList.remove("drag-over");
+  if (selectedItem) {
+    addTodoToCompletedList(selectedItem.querySelector("input"));
+    selectedItem = null;
+  }
 }
 
 function addTodoToPendingList(event) {
@@ -104,8 +93,6 @@ function addTodoToPendingList(event) {
   if (!inserted) {
     pendingList.appendChild(newItem);
   }
-
-  makeDraggable(pendingList.lastElementChild);
 
   console.log(
     `Added new todo with text: ${todoTextInput} with priority ${priorityValue} to the pending list`
